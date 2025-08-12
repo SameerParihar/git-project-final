@@ -46,7 +46,7 @@
       else inTimeClass = 'absent';
     }
   %>
-
+<!-- intime-->
   <% if (selectedDate === today) { %>
     <% if (emp.in_time) { %>
       <span class="<%= inTimeClass %>"><%= inTimeStr %></span>
@@ -70,7 +70,7 @@
   <% } %>
 </td>
 
-
+<!-- outtime-->
             <td>
               <% if (selectedDate === today) { %>
                 <% if (emp.in_time) { %>  <% if (emp.out_time) { %>
