@@ -2,8 +2,8 @@
 
 <main>
   <h2 class="center"> Dashboard - <%= station %> - <%= today %></h2>
-  <h3 class="center">Items</h3>
-  <div class="ctflex">
+  <h3 class="center">Overview</h3>
+  
     <div class="dashbody">
 
       <!-- Absent Employees -->
@@ -53,7 +53,7 @@
           <p>All bins sufficiently stocked.</p>
         <% } %>
       </section>
-    </div>
+
 
     <div class="dashbody2">
         <!-- Late Employees -->
@@ -104,7 +104,7 @@
       </section>
     </div>
   </div>
- <h3 class="center">Messages</h3>
+
 </main>
 
 <style>
@@ -143,18 +143,19 @@
 .dashbody, .dashbody2 {
   flex: 1 1 auto; /* Allows flex items to grow and shrink based on content */
   min-width: 0;
-  padding: 0 10px;
+  
 }
 
 section {
   padding: 6px 0; /* reduce vertical padding */
   margin-bottom: 10px;
+  padding: 0 10px;
 }
 .yellow{
   color:goldenrod;
 }
 .dashbody{
-  padding:0;
+  padding:0 100px;
 }
 </style>
 

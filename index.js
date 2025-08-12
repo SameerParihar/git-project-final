@@ -1,5 +1,5 @@
 import express from "express";
-import bodyparser from "body-parser";
+import bodyParser from "body-parser";
 import pg from "pg";
 import dotenv from "dotenv";
 
@@ -7,12 +7,11 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-let currentStation="Vaishali";
+let currentStation = "Vaishali";
 
 app.use(express.static("public"));
-app.use(bodyparser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
-
 
 const db = new pg.Client({
   connectionString: process.env.DB_VAISHALI_URL,
@@ -26,9 +25,9 @@ db.connect()
     process.exit(1);
   });
 
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
   res.redirect("/dashboard");
-})
+});
 
 app.post("/set-station", (req, res) => {
   const { station } = req.body;
@@ -36,22 +35,19 @@ app.post("/set-station", (req, res) => {
     currentStation = station;
     console.log("Station updated to:", currentStation);
   }
-  res.redirect(req.headers.referer || "/"); 
+  res.redirect(req.headers.referer || "/");
 });
 
-
 app.listen(PORT, () => {
-  console.log(` Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
 
 /* employees */
-
 app.get("/employees", async (req, res) => {
   const selectedDate = req.query.date || new Date().toISOString().slice(0, 10);
   const today = new Date().toISOString().slice(0, 10);
 
   try {
-  
     const employeesResult = await db.query(
       `SELECT e.*, d.age, d.blood_group, d.email, d.phone_no
        FROM employee e
@@ -61,7 +57,6 @@ app.get("/employees", async (req, res) => {
       [currentStation, selectedDate]
     );
 
- 
     const historyResult = await db.query(
       `SELECT id, date, in_time
        FROM employee
@@ -72,7 +67,6 @@ app.get("/employees", async (req, res) => {
       [currentStation]
     );
 
-    
     const countsResult = await db.query(
       `SELECT
          id,
@@ -86,13 +80,11 @@ app.get("/employees", async (req, res) => {
       [currentStation, today]
     );
 
-  
     const historyMap = {};
     historyResult.rows.forEach(row => {
       if (!historyMap[row.id]) historyMap[row.id] = [];
       historyMap[row.id].push(row);
     });
-
 
     const countsMap = {};
     countsResult.rows.forEach(row => {
@@ -112,7 +104,6 @@ app.get("/employees", async (req, res) => {
       selectedDate,
       today
     });
-
   } catch (err) {
     console.error("Error fetching employees data:", err);
     res.status(500).send("Error fetching employees data");
@@ -144,13 +135,10 @@ app.post("/mark-attendance/:id/:type", async (req, res) => {
 });
 
 /* dashboard */
-const today = new Date().toISOString().slice(0, 10);
-
 app.get("/dashboard", async (req, res) => {
   const today = new Date().toISOString().slice(0, 10);
 
   try {
-    
     const lateResult = await db.query(
       `SELECT e.*, d.age, d.blood_group, d.email, d.phone_no
        FROM employee e
@@ -174,35 +162,28 @@ app.get("/dashboard", async (req, res) => {
     );
 
     const suppliesResult = await db.query(
-      `SELECT id, item_name, current_volume
-       FROM supplies
-       WHERE LOWER(station) = LOWER($1)
-       ORDER BY item_name`,
-      [currentStation]
+      `SELECT id, item_name, current_volume FROM supplies WHERE LOWER(station) = LOWER($1) AND date = $2 ORDER BY item_name`,
+      [currentStation, today]
     );
 
     const binsResult = await db.query(
-      `SELECT id, bin_name, current_volume
-       FROM bins
-       WHERE LOWER(station) = LOWER($1)
-       ORDER BY bin_name`,
-      [currentStation]
+      `SELECT id, bin_name, current_volume FROM bins WHERE LOWER(station) = LOWER($1) AND date = $2 ORDER BY bin_name`,
+      [currentStation, today]
     );
 
     const maxSupplyVolume = 10;
     const maxBinVolume = 50;
 
-    
     const redSupplies = suppliesResult.rows.filter(item => (item.current_volume / maxSupplyVolume) * 100 < 25);
     const yellowSupplies = suppliesResult.rows.filter(item => {
       const percent = (item.current_volume / maxSupplyVolume) * 100;
       return percent >= 25 && percent < 50;
     });
 
-    const redBins = binsResult.rows.filter(bin => (bin.current_volume / maxBinVolume) * 100 < 25);
+    const redBins = binsResult.rows.filter(bin => (bin.current_volume / maxBinVolume) * 100 > 75);
     const yellowBins = binsResult.rows.filter(bin => {
       const percent = (bin.current_volume / maxBinVolume) * 100;
-      return percent >= 25 && percent < 50;
+      return percent >= 50 && percent <= 75;
     });
 
     res.render("dashboard.ejs", {
@@ -224,81 +205,86 @@ app.get("/dashboard", async (req, res) => {
   }
 });
 
-
-
-
 /* supplies */
-const maxVolume=10;
+const maxVolume = 10;
 
-
-app.get('/supplies', async (req, res) => {
+app.get("/supplies", async (req, res) => {
   try {
     const station = currentStation;
+    const selectedDate = req.query.date || new Date().toISOString().slice(0, 10);
+    const startOfMonth = new Date(selectedDate.slice(0, 7) + "-01").toISOString().slice(0, 10);
+    const endOfMonth = new Date(new Date(startOfMonth).getFullYear(), new Date(startOfMonth).getMonth() + 1, 0).toISOString().slice(0, 10);
 
-    const suppliesResult = await db.query(
-      `SELECT * FROM supplies WHERE LOWER(station) = LOWER($1) ORDER BY id`,
-      [station]
+    const suppliesTodayResult = await db.query(
+      `SELECT * FROM supplies WHERE LOWER(station) = LOWER($1) AND date = $2 ORDER BY id`,
+      [station, selectedDate]
+    );
+    const binsTodayResult = await db.query(
+      `SELECT * FROM bins WHERE LOWER(station) = LOWER($1) AND date = $2 ORDER BY id`,
+      [station, selectedDate]
     );
 
-    const binsResult = await db.query(
-      `SELECT * FROM bins WHERE LOWER(station) = LOWER($1) ORDER BY id`,
-      [station]
+    const suppliesMonthlyResult = await db.query(
+      `SELECT * FROM supplies WHERE LOWER(station) = LOWER($1) AND date >= $2 AND date <= $3 ORDER BY id`,
+      [station, startOfMonth, endOfMonth]
+    );
+    const binsMonthlyResult = await db.query(
+      `SELECT * FROM bins WHERE LOWER(station) = LOWER($1) AND date >= $2 AND date <= $3 ORDER BY id`,
+      [station, startOfMonth, endOfMonth]
     );
 
-    
-    const maxSupplyVolume = 10; 
-    const maxBinVolume = 50;     
+    const maxSupplyVolume = 10;
+    const maxBinVolume = 50;
 
-    res.render('supplies.ejs', {
-      activeTab: 'supplies',
+    res.render("supplies.ejs", {
+      activeTab: "supplies",
       station,
-      supplies: suppliesResult.rows,
-      bins: binsResult.rows,
+      suppliesToday: suppliesTodayResult.rows,
+      binsToday: binsTodayResult.rows,
+      suppliesMonthly: suppliesMonthlyResult.rows,
+      binsMonthly: binsMonthlyResult.rows,
       maxSupplyVolume,
       maxBinVolume,
-      today: new Date().toISOString().slice(0,10)
+      today: selectedDate
     });
   } catch (err) {
-    console.error('Error fetching supplies or bins:', err);
-    res.status(500).send('Error loading supplies and bins');
+    console.error("Error fetching supplies or bins:", err);
+    res.status(500).send("Error loading supplies and bins");
   }
 });
 
-
-app.post('/supplies/update/:type/:id', async (req, res) => {
+app.post("/supplies/update/:type/:id", async (req, res) => {
   const { type, id } = req.params;
   const { current_volume } = req.body;
+  const today = new Date().toISOString().slice(0, 10);
 
-  if (!['supply', 'bin'].includes(type)) {
-    return res.status(400).send('Invalid type');
+  if (!["supply", "bin"].includes(type)) {
+    return res.status(400).send("Invalid type");
   }
 
   if (isNaN(current_volume) || current_volume < 0) {
-    return res.status(400).send('Invalid volume');
+    return res.status(400).send("Invalid volume");
   }
 
-  const tableName = type === 'supply' ? 'supplies' : 'bins';
+  const tableName = type === "supply" ? "supplies" : "bins";
 
   try {
     await db.query(
-      `UPDATE ${tableName} SET current_volume = $1 WHERE id = $2`,
-      [current_volume, id]
+      `UPDATE ${tableName} SET current_volume = $1 WHERE id = $2 AND date = $3 AND LOWER(station) = LOWER($4)`,
+      [current_volume, id, today, currentStation]
     );
-    res.status(200).send('Volume updated');
+    res.status(200).send("Volume updated");
   } catch (err) {
-    console.error('Error updating volume:', err);
-    res.status(500).send('Failed to update volume');
+    console.error("Error updating volume:", err);
+    res.status(500).send("Failed to update volume");
   }
 });
 
 /* messages */
-app.get("/messages",(req,res)=>{
+app.get("/messages", (req, res) => {
   let atmessages = true;
-  res.render("messages.ejs",{
-    activeTab: 'messages',
+  res.render("messages.ejs", {
+    activeTab: "messages",
     station: currentStation,
-
   });
-})
-
-
+});

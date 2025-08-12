@@ -3,7 +3,7 @@
 <main>
   <h2 class="center">Supplies - <%= station %> - <%= today %></h2>
 
-  <% if (supplies.length === 0) { %>
+  <% if (suppliesToday.length === 0) { %>
     <p>No supplies data available for this station.</p>
   <% } else { %>
     <h3 class="center">Items</h3>
@@ -15,7 +15,7 @@
         </tr>
       </thead>
       <tbody>
-        <% supplies.forEach(item => {
+        <% suppliesToday.forEach(item => {
           const percent = (item.current_volume / maxSupplyVolume) * 100;
           let colorClass = 'green';
           if (percent < 25) colorClass = 'red';
@@ -24,12 +24,12 @@
           <tr data-id="<%= item.id %>" data-type="supply">
             <td><%= item.item_name %></td>
             <td>
-              <input 
-                type="number" 
-                class="volume-input <%= colorClass %>" 
-                value="<%= item.current_volume %>" 
-                min="0" 
-                max="<%= maxSupplyVolume %>" 
+              <input
+                type="number"
+                class="volume-input <%= colorClass %>"
+                value="<%= item.current_volume %>"
+                min="0"
+                max="<%= maxSupplyVolume %>"
                 step="0.01"
                 style="width: 70px;"
               /> / <%= maxSupplyVolume %>
@@ -38,9 +38,55 @@
         <% }) %>
       </tbody>
     </table>
+
+    <% 
+      // Calculate net usage for today
+      const todayItemUsage = { 'Glass Cleaner': 0, 'Floor Cleaner': 0, 'Disinfectant': 0, 'Liquid Soap': 0 };
+      suppliesToday.forEach(item => {
+        const volume = parseFloat(item.current_volume) || 0;
+        const used = maxSupplyVolume - volume;
+        if (todayItemUsage.hasOwnProperty(item.item_name)) {
+          todayItemUsage[item.item_name] += used;
+        }
+      });
+      // Calculate net usage for the month
+      const monthlyItemUsage = { 'Glass Cleaner': 0, 'Floor Cleaner': 0, 'Disinfectant': 0, 'Liquid Soap': 0 };
+      suppliesMonthly.forEach(item => {
+        const volume = parseFloat(item.current_volume) || 0;
+        const used = maxSupplyVolume - volume;
+        if (monthlyItemUsage.hasOwnProperty(item.item_name)) {
+          monthlyItemUsage[item.item_name] += used;
+        }
+      });
+    %>
+    <h4 class="center">Supplies Used</h4>
+    <div class="flex-container">
+      <div class="usage-item">
+        <p>Glass Cleaner</p>
+        <p>Today: <%= todayItemUsage['Glass Cleaner'].toFixed(2) %> ltrs</p>
+        <p>This Month: <%= monthlyItemUsage['Glass Cleaner'].toFixed(2) %> ltrs</p>
+      </div>
+      <div class="usage-item">
+        <p>Floor Cleaner</p>
+        <p>Today: <%= todayItemUsage['Floor Cleaner'].toFixed(2) %> ltrs</p>
+        <p>This Month: <%= monthlyItemUsage['Floor Cleaner'].toFixed(2) %> ltrs</p>
+      </div>
+      <div class="usage-item">
+        <p>Disinfectant</p>
+        <p>Today: <%= todayItemUsage['Disinfectant'].toFixed(2) %> ltrs</p>
+        <p>This Month: <%= monthlyItemUsage['Disinfectant'].toFixed(2) %> ltrs</p>
+      </div>
+      <div class="usage-item">
+        <p>Liquid Soap</p>
+        <p>Today: <%= todayItemUsage['Liquid Soap'].toFixed(2) %> ltrs</p>
+        <p>This Month: <%= monthlyItemUsage['Liquid Soap'].toFixed(2) %> ltrs</p>
+      </div>
+    </div>
   <% } %>
 
-  <% if (bins.length === 0) { %>
+  <hr>
+
+  <% if (binsToday.length === 0) { %>
     <p>No bins data available for this station.</p>
   <% } else { %>
     <h3 class="center">Bins</h3>
@@ -52,10 +98,9 @@
         </tr>
       </thead>
       <tbody>
-        <% bins.forEach(bin => {
+        <% binsToday.forEach(bin => {
           const percent = (bin.current_volume / maxBinVolume) * 100;
           let colorClass;
-          // reversed coloring for bins
           if (percent < 25) colorClass = 'green';
           else if (percent < 50) colorClass = 'yellow';
           else colorClass = 'red';
@@ -63,12 +108,12 @@
           <tr data-id="<%= bin.id %>" data-type="bin">
             <td><%= bin.bin_name %></td>
             <td>
-              <input 
-                type="number" 
-                class="volume-input <%= colorClass %>" 
-                value="<%= bin.current_volume %>" 
-                min="0" 
-                max="<%= maxBinVolume %>" 
+              <input
+                type="number"
+                class="volume-input <%= colorClass %>"
+                value="<%= bin.current_volume %>"
+                min="0"
+                max="<%= maxBinVolume %>"
                 step="0.01"
                 style="width: 70px;"
               /> / <%= maxBinVolume %>
@@ -77,6 +122,44 @@
         <% }) %>
       </tbody>
     </table>
+
+    <% 
+      // Calculate net trash for today
+      let todayGreenTrash = 0;
+      let todayBlueTrash = 0;
+      binsToday.forEach(bin => {
+        const volume = parseFloat(bin.current_volume) || 0;
+        if (bin.bin_name.startsWith('green_bin')) {
+          todayGreenTrash += volume;
+        } else if (bin.bin_name.startsWith('blue_bin')) {
+          todayBlueTrash += volume;
+        }
+      });
+      // Calculate net trash for the month
+      let monthlyGreenTrash = 0;
+      let monthlyBlueTrash = 0;
+      binsMonthly.forEach(bin => {
+        const volume = parseFloat(bin.current_volume) || 0;
+        if (bin.bin_name.startsWith('green_bin')) {
+          monthlyGreenTrash += volume;
+        } else if (bin.bin_name.startsWith('blue_bin')) {
+          monthlyBlueTrash += volume;
+        }
+      });
+    %>
+    <h4 class="center">Trash Collected</h4>
+    <div class="flex-container">
+      <div class="usage-item">
+        <p>Green Trash</p>
+        <p>Today: <%= todayGreenTrash.toFixed(2) %> ltrs</p>
+        <p>This Month: <%= monthlyGreenTrash.toFixed(2) %> ltrs</p>
+      </div>
+      <div class="usage-item">
+        <p>Blue Bin Trash</p>
+        <p>Today: <%= todayBlueTrash.toFixed(2) %> ltrs</p>
+        <p>This Month: <%= monthlyBlueTrash.toFixed(2) %> ltrs</p>
+      </div>
+    </div>
   <% } %>
 </main>
 
@@ -116,12 +199,10 @@
         e.target.classList.remove('red', 'yellow', 'green');
 
         if (type === 'supply') {
-          // supplies: low volume = red
           if (percent < 25) e.target.classList.add('red');
           else if (percent < 50) e.target.classList.add('yellow');
           else e.target.classList.add('green');
         } else {
-          // bins: reversed coloring
           if (percent < 25) e.target.classList.add('green');
           else if (percent < 50) e.target.classList.add('yellow');
           else e.target.classList.add('red');
@@ -165,6 +246,26 @@
   }
   input.volume-input.green {
     color: green;
+  }
+  .flex-container {
+    display: flex;
+    flex-wrap: wrap; /* Allows items to wrap on smaller screens */
+    justify-content: space-around;
+    width: 80%;
+    margin: 1rem auto;
+  }
+  .usage-item {
+    flex: 1 1 200px; /* Flex-grow, flex-shrink, flex-basis */
+    margin: 0.5rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    color:white;
+    border-radius: 8px;
+    text-align: center;
+    background-color:#323232;
+  }
+  .usage-item p {
+    margin: 0.25rem 0;
   }
 </style>
 
