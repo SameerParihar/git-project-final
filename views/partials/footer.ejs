@@ -1,0 +1,19 @@
+</main>
+<footer>
+    <div class="outer-div">
+    <div class="inner-div">
+    <form action="/set-station" method="POST">
+  <label for="station">Select Station:</label>
+  <select id="station" name="station" onchange="this.form.submit()">
+    <option value="Anand Vihar" <%= station === "Anand Vihar" ? "selected" : "" %>>Anand Vihar</option>
+    <option value="Vaishali" <%= station === "Vaishali" ? "selected" : "" %>>Vaishali</option>
+    <option value="Mayur Vihar" <%= station === "Mayur Vihar" ? "selected" : "" %>>Mayur Vihar</option>
+  </select>
+</form>
+
+</div>
+</div>
+
+</footer>
+</body>
+</html>

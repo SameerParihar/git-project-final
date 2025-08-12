@@ -1,0 +1,169 @@
+*{
+    font-family: "Roboto Condensed", sans-serif;
+    padding: 0px;
+    margin: 0px;
+    /*color:aliceblue*/;
+}
+body{
+    background-color:aliceblue;
+}
+main{
+    padding-bottom:30px;
+}
+.center{
+    text-align: center;
+}
+.title{
+    background-color: rgb(8, 94, 170);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+.big-text{
+    font-size:3rem;
+}
+.medium-text{
+    font-size:2.25rem;
+}
+.text{
+    font-size:1.25rem;
+}
+.metro-logo{
+    width:50px;
+}
+.ccflex{
+    display:flex;
+    justify-content: center;
+    gap :20px;
+    align-items: center;
+    padding:5px;
+}
+/* header styling */
+.tabs{
+    display:flex;
+    background-color: rgb(8, 94, 170);
+    padding:5px;
+    border-radius:50px;
+    margin:10px;
+}
+.shadow{
+    box-shadow: 0 0 1px 0 rgb(39, 39, 39),
+    0 6px 12px 0 rgb(182, 182, 182);
+}
+.tab{
+    display:flex;
+    width:150px;
+    height:40px;
+    align-items:center;
+    justify-content: center;
+    font-size:1.25rem;
+    cursor:pointer;
+    font-weight: 600;
+    transition: color 0.15s ease-in;
+    z-index:1;
+
+}
+
+.glider{
+    position:absolute;
+    display:flex;
+    width:150px;
+    height:40px;
+    background-color:rgb(8, 40, 69);
+    border-radius:50px;
+    transition: .25s ease-out;
+}
+
+input[type=radio] {
+    display:none;
+}
+input[type=radio]:checked + label {
+    color: rgb(255, 255, 255);
+}
+input[id=radio1]:checked ~ .glider {
+  transform: translateX(0);
+}
+
+input[id=radio2]:checked ~ .glider {
+  transform: translateX(100%);
+}
+
+input[id=radio3]:checked ~ .glider {
+  transform: translateX(200%);
+}
+/* table styling */
+table {
+      width: 100%;
+      border-collapse: collapse;
+      
+    }
+    thead th {
+      border-bottom: 2px solid #333;
+      text-align: left;
+      padding: 12px;
+      font-weight: bold;
+    }
+    tbody td {
+      padding: 12px;
+      border-bottom: 1px solid rgb(209, 216, 222);
+    }
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+/* footer styling */
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.outer-div{
+    background-color: rgb(8, 94, 170);
+    display:flex;
+    
+    align-items:center;
+    justify-content: center;
+    padding:6px;
+}
+.inner-div{
+    display:flex;
+    align-items:center;
+    justify-content: center;
+    gap:5px;
+    color:white;
+    font-size:1,25rem;
+    padding:0 10px;
+    height:40px;
+    background-color:rgb(8, 40, 69);
+    border-radius:50px;
+    transition: .25s ease-out;
+    padding-left:14px;
+}
+select{
+    border-radius:50px;
+    padding:4px;
+    text-align:center;
+}
+
+/* employees styling */
+.date-selector{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom:10px;
+}
+.absent {
+  color: red;
+  font-weight: bold;
+}
+.mark-btn {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.mark-btn:hover {
+  text-decoration: underline;
+}
+
+/*dashboard*/

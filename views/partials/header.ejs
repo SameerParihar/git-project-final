@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+
+    <div class="ccflex title">
+        <img class="metro-logo" src="assets/Delhi_Metro_logo.svg.png"/>
+            <h1 class="center big-text">DELHI METRO RAIL CORPORATION LTD.</h1>
+        <img class="metro-logo" src="assets\Delhi_Metro_logo.svg.png"/>
+    </div>
+
+    <div class="ccflex container" style="<%= activeTab === 'messages' ? 'display:none;' : '' %>">
+
+       <div class="tabs shadow">
+    <input type="radio" id="radio1" name="tabs" onclick="goToPage('/supplies')" 
+        <%= activeTab === "supplies" ? "checked" : "" %> >
+    <label for="radio1" class="tab">Supplies</label>
+
+    <input type="radio" id="radio2" name="tabs" onclick="goToPage('/dashboard')" 
+        <%= activeTab === "dashboard" ? "checked" : "" %> >
+    <label for="radio2" class="tab">Dashboard</label>
+
+    <input type="radio" id="radio3" name="tabs" onclick="goToPage('/employees')" 
+        <%= activeTab === "employees" ? "checked" : "" %> >
+    <label for="radio3" class="tab">Employees</label>
+
+    <span class="glider"></span>
+    </div>
+    </div>
+</header>
+<main>
+
+<script>
+function goToPage(url) {
+    setTimeout(() => {
+        window.location.href = url;
+    }, 200); 
+}
+</script>

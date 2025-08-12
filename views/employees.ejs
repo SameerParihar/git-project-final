@@ -1,0 +1,238 @@
+<%- include('partials/header', { activeTab: activeTab }) %>
+
+<main>
+  <% 
+    const today = new Date().toISOString().slice(0, 10);
+    const nowTime = new Date().toTimeString().slice(0,5); // HH:MM
+  %>
+  <div class="employee-top">
+  <h2 class="center">Employees - <%= station %> - <%= today %></h2>
+
+
+  <form class="date-selector" action="/employees" method="get">
+    <label for="date">Select Date:</label>
+    <input type="date" id="date" name="date" 
+       value="<%= selectedDate %>" 
+       max="<%= today %>" 
+       required>
+    <button type="submit">Go</button>
+  </form>
+</div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>In Time</th>
+        <th>Out Time</th>
+        <th>Station</th>
+        <th>View More</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (rows.length > 0) { %>
+        <% rows.forEach(emp => { %>
+          <tr>
+            <td><%= emp.id %></td>
+            <td><%= emp.name %></td>
+
+            <!-- in -->
+            <td>
+  <% 
+    let inTimeStr = emp.in_time ? emp.in_time.toString().slice(0,5) : null;
+    let inTimeClass = 'absent';
+    if (inTimeStr) {
+      if (inTimeStr <= "10:35") inTimeClass = 'green';
+      else if (inTimeStr <= "10:45") inTimeClass = 'yellow';
+      else inTimeClass = 'absent';
+    }
+  %>
+
+  <% if (selectedDate === today) { %>
+    <% if (emp.in_time) { %>
+      <span class="<%= inTimeClass %>"><%= inTimeStr %></span>
+    <% } else { %>
+      <% if (nowTime < "10:15") { %>
+        Available at 10:15
+      <% } else if (nowTime >= "10:15" && nowTime <= "12:00") { %>
+        <button class="mark-btn" onclick="markAttendance(<%= emp.id %>, 'in')">
+          <i class="fa fa-sign-in-alt"></i> Mark Attendance
+        </button>
+      <% } else { %>
+        <span class="absent">Absent</span>
+      <% } %>
+    <% } %>
+  <% } else { %>
+    <% if (emp.in_time) { %>
+      <span class="<%= inTimeClass %>"><%= inTimeStr %></span>
+    <% } else { %>
+      <span class="absent">Absent</span>
+    <% } %>
+  <% } %>
+</td>
+
+
+            <!-- out -->
+            <td>
+              <% if (selectedDate === today) { %>
+                <% if (emp.out_time) { %>
+                  <%= emp.out_time.toString().slice(0,5) %>
+                <% } else { %>
+                  <% if (nowTime < "17:45") { %>
+                    Available at 17:45
+                  <% } else if (nowTime >= "17:45" && nowTime <= "18:15") { %>
+                    <button class="mark-btn" onclick="markAttendance(<%= emp.id %>, 'out')">
+                      <i class="fa fa-sign-out-alt"></i> Mark Attendance
+                    </button>
+                  <% } else { %>
+                    <span class="absent">Absent</span>
+                  <% } %>
+                <% } %>
+              <% } else { %>
+                <%- emp.out_time 
+                  ? `<span>${emp.out_time.toString().slice(0,5)}</span>` 
+                  : `<span class="absent">Absent</span>` %>
+              <% } %>
+            </td>
+
+            <td><%= emp.station %></td>
+            <td>
+              <button class="view-more-btn" onclick="toggleDetails('<%= emp.id %>')">⬇</button>
+            </td>
+          </tr>
+
+          <!-- hidden tbale -->
+          <tr id="details-<%= emp.id %>" style="display:none;" class="hidden-row">
+  <td colspan="6" class="hidden-content-cell">
+    <div class="hidden-content">
+      <div class="emp-details center">
+        <strong>Age:</strong> <%= emp.age %> |
+        <strong>Blood Group:</strong> <%= emp.blood_group %> |
+        <strong>Email:</strong> <%= emp.email %> |
+        <strong>Phone:</strong> <%= emp.phone_no %>
+      </div>
+
+      <div class="attendance-summary center" style="margin-bottom: 15px;">
+        <strong>Attendance Summary (All Time):</strong>
+        <span style="color:green; margin-left: 10px;">On Time: <%= countsMap[emp.id]?.ontime || 0 %></span> |
+        <span style="color:goldenrod; margin-left: 10px;">Late: <%= countsMap[emp.id]?.late || 0 %></span> |
+        <span style="color:red; margin-left: 10px;">Absent: <%= countsMap[emp.id]?.absent || 0 %></span>
+      </div>
+
+      <div class="attendance-history">
+        <h4 class="center">Last 7 Days In-Time</h4>
+        <table class="history-table">
+          <tr>
+            <% 
+              (historyMap[emp.id] || []).forEach(day => { 
+                if (new Date(day.date) > new Date()) return;
+                let inTimeStr = day.in_time ? day.in_time.toString().slice(0,5) : null;
+                let colorClass = 'absent';
+                if (inTimeStr) {
+                  if (inTimeStr <= "10:35") colorClass = 'green';
+                  else if (inTimeStr <= "10:45") colorClass = 'yellow';
+                }
+                let coloredHtml = inTimeStr 
+                  ? `<span class="${colorClass}">${inTimeStr}</span>` 
+                  : `<span class="absent">Absent</span>`;
+            %>
+              <td>
+                <div><%= day.date.toISOString().slice(0,10) %></div>
+                <div><%- coloredHtml %></div>
+              </td>
+            <% }) %>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </td>
+</tr>
+
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="6" style="text-align:center;">No records found for this date</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</main>
+
+<script>
+  function markAttendance(id, type) {
+    fetch(`/mark-attendance/${id}/${type}`, { method: 'POST' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          location.reload();
+        } else {
+          alert("Failed to mark attendance");
+        }
+      })
+      .catch(err => console.error(err));
+  }
+
+  function toggleDetails(id) {
+    const row = document.getElementById(`details-${id}`);
+    row.style.display = (row.style.display === "none" || row.style.display === "") 
+      ? "table-row" 
+      : "none";
+  }
+</script>
+
+<style>
+  .green { color: green; }
+  .yellow { color: goldenrod; }
+  .absent { color: red; }
+  .hidden-row td {
+    background: aliceblue;
+  }
+  .emp-details {
+    margin-bottom: 10px;
+  }
+  .view-more-btn {
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.2em;
+  }
+  .hidden-content-cell {
+    text-align: center;
+    padding: 15px;
+  }
+  .hidden-content {
+    display: inline-block;
+    text-align: left;
+    background: aliceblue;
+    padding: 15px;
+    border-radius: 10px;
+  }
+  .history-table {
+    border-collapse: collapse;
+    margin-top: 5px;
+  }
+  .history-table td {
+    padding: 8px 12px;
+    text-align: center;
+    border: 1px solid #ccc;
+  }
+  .history-table div:first-child {
+    font-weight: bold;
+  }
+  .history-table div:last-child {
+    margin-top: 4px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1em;
+    padding-top: 10px;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+
+</style>
+
+<%- include('partials/footer') %>

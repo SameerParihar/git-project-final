@@ -1,0 +1,171 @@
+<%- include('partials/header', { activeTab: activeTab }) %>
+
+<main>
+  <h2 class="center">Supplies - <%= station %> - <%= today %></h2>
+
+  <% if (supplies.length === 0) { %>
+    <p>No supplies data available for this station.</p>
+  <% } else { %>
+    <h3 class="center">Items</h3>
+    <table>
+      <thead>
+        <tr>
+          <th class="center">Item</th>
+          <th class="center">Amount (in ltrs)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% supplies.forEach(item => {
+          const percent = (item.current_volume / maxSupplyVolume) * 100;
+          let colorClass = 'green';
+          if (percent < 25) colorClass = 'red';
+          else if (percent < 50) colorClass = 'yellow';
+        %>
+          <tr data-id="<%= item.id %>" data-type="supply">
+            <td><%= item.item_name %></td>
+            <td>
+              <input 
+                type="number" 
+                class="volume-input <%= colorClass %>" 
+                value="<%= item.current_volume %>" 
+                min="0" 
+                max="<%= maxSupplyVolume %>" 
+                step="0.01"
+                style="width: 70px;"
+              /> / <%= maxSupplyVolume %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+
+  <% if (bins.length === 0) { %>
+    <p>No bins data available for this station.</p>
+  <% } else { %>
+    <h3 class="center">Bins</h3>
+    <table>
+      <thead>
+        <tr>
+          <th class="center">Bin Name</th>
+          <th class="center">Amount (in ltrs)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% bins.forEach(bin => {
+          const percent = (bin.current_volume / maxBinVolume) * 100;
+          let colorClass;
+          // reversed coloring for bins
+          if (percent < 25) colorClass = 'green';
+          else if (percent < 50) colorClass = 'yellow';
+          else colorClass = 'red';
+        %>
+          <tr data-id="<%= bin.id %>" data-type="bin">
+            <td><%= bin.bin_name %></td>
+            <td>
+              <input 
+                type="number" 
+                class="volume-input <%= colorClass %>" 
+                value="<%= bin.current_volume %>" 
+                min="0" 
+                max="<%= maxBinVolume %>" 
+                step="0.01"
+                style="width: 70px;"
+              /> / <%= maxBinVolume %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</main>
+
+<script>
+  const maxSupplyVolume = <%= maxSupplyVolume %>;
+  const maxBinVolume = <%= maxBinVolume %>;
+
+  document.querySelectorAll('.volume-input').forEach(input => {
+    input.addEventListener('change', async (e) => {
+      const val = parseFloat(e.target.value);
+      const row = e.target.closest('tr');
+      const id = row.dataset.id;
+      const type = row.dataset.type;
+
+      const maxVolume = type === 'supply' ? maxSupplyVolume : maxBinVolume;
+
+      if (isNaN(val) || val < 0 || val > maxVolume) {
+        alert(`Please enter a value between 0 and ${maxVolume}`);
+        e.target.value = e.target.defaultValue;
+        return;
+      }
+
+      try {
+        const response = await fetch(`/supplies/update/${type}/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `current_volume=${val}`
+        });
+
+        if (!response.ok) {
+          alert('Failed to update volume');
+          e.target.value = e.target.defaultValue;
+          return;
+        }
+
+        const percent = (val / maxVolume) * 100;
+        e.target.classList.remove('red', 'yellow', 'green');
+
+        if (type === 'supply') {
+          // supplies: low volume = red
+          if (percent < 25) e.target.classList.add('red');
+          else if (percent < 50) e.target.classList.add('yellow');
+          else e.target.classList.add('green');
+        } else {
+          // bins: reversed coloring
+          if (percent < 25) e.target.classList.add('green');
+          else if (percent < 50) e.target.classList.add('yellow');
+          else e.target.classList.add('red');
+        }
+
+        e.target.defaultValue = val;
+      } catch (err) {
+        console.error(err);
+        alert('Error updating volume');
+        e.target.value = e.target.defaultValue;
+      }
+    });
+  });
+</script>
+
+<style>
+  .center {
+    text-align: center;
+  }
+  table {
+    width: 80%;
+    margin: 1rem auto;
+    border-collapse: collapse;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 0.6rem 1rem;
+    text-align: center;
+  }
+  input.volume-input {
+    font-weight: bold;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: right;
+  }
+  input.volume-input.red {
+    color: red;
+  }
+  input.volume-input.yellow {
+    color: goldenrod;
+  }
+  input.volume-input.green {
+    color: green;
+  }
+</style>
+
+<%- include('partials/footer') %>
