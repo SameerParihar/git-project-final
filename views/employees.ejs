@@ -12,9 +12,9 @@
   <form class="date-selector" action="/employees" method="get">
     <label for="date">Select Date:</label>
     <input type="date" id="date" name="date" 
-       value="<%= selectedDate %>" 
-       max="<%= today %>" 
-       required>
+        value="<%= selectedDate %>" 
+        max="<%= today %>" 
+        required>
     <button type="submit">Go</button>
   </form>
 </div>
@@ -36,7 +36,6 @@
             <td><%= emp.id %></td>
             <td><%= emp.name %></td>
 
-            <!-- in -->
             <td>
   <% 
     let inTimeStr = emp.in_time ? emp.in_time.toString().slice(0,5) : null;
@@ -72,21 +71,22 @@
 </td>
 
 
-            <!-- out -->
             <td>
               <% if (selectedDate === today) { %>
-                <% if (emp.out_time) { %>
-                  <%= emp.out_time.toString().slice(0,5) %>
-                <% } else { %>
-                  <% if (nowTime < "17:45") { %>
-                    Available at 17:45
-                  <% } else if (nowTime >= "17:45" && nowTime <= "18:15") { %>
-                    <button class="mark-btn" onclick="markAttendance(<%= emp.id %>, 'out')">
-                      <i class="fa fa-sign-out-alt"></i> Mark Attendance
-                    </button>
+                <% if (emp.in_time) { %>  <% if (emp.out_time) { %>
+                    <%= emp.out_time.toString().slice(0,5) %>
                   <% } else { %>
-                    <span class="absent">Absent</span>
+                    <% if (nowTime < "17:45") { %>
+                      Available at 17:45
+                    <% } else if (nowTime >= "17:45" && nowTime <= "18:15") { %>
+                      <button class="mark-btn" onclick="markAttendance(<%= emp.id %>, 'out')">
+                        <i class="fa fa-sign-out-alt"></i> Mark Attendance
+                      </button>
+                    <% } else { %>
+                      <span class="absent">Absent</span>
+                    <% } %>
                   <% } %>
+                <% } else { %> <span class="absent">Absent</span>
                 <% } %>
               <% } else { %>
                 <%- emp.out_time 
@@ -101,7 +101,6 @@
             </td>
           </tr>
 
-          <!-- hidden tbale -->
           <tr id="details-<%= emp.id %>" style="display:none;" class="hidden-row">
   <td colspan="6" class="hidden-content-cell">
     <div class="hidden-content">
