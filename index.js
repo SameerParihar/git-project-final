@@ -44,10 +44,12 @@ app.listen(PORT, () => {
 
 /* employees */
 app.get("/employees", async (req, res) => {
-  const selectedDate = req.query.date || new Date().toISOString().slice(0, 10);
-  const today = new Date().toISOString().slice(0, 10);
+  
+  const today = new Date().toLocaleDateString('en-CA'); 
+  const selectedDate = req.query.date || today;
 
   try {
+  
     const employeesResult = await db.query(
       `SELECT e.*, d.age, d.blood_group, d.email, d.phone_no
        FROM employee e
@@ -56,6 +58,7 @@ app.get("/employees", async (req, res) => {
        ORDER BY e.id`,
       [currentStation, selectedDate]
     );
+
 
     const historyResult = await db.query(
       `SELECT id, date, in_time
@@ -66,6 +69,7 @@ app.get("/employees", async (req, res) => {
        ORDER BY date DESC`,
       [currentStation]
     );
+
 
     const countsResult = await db.query(
       `SELECT
