@@ -6,7 +6,7 @@
   
     <div class="dashbody">
 
-      <!-- Absent Employees -->
+      <!-- abesnt -->
       <section>
         <h3>Absent Employees</h3>
         <% if (absentEmployees.length > 0) { %>
@@ -22,7 +22,7 @@
         <% } %>
       </section>
 
-      <!-- Red Supplies -->
+      <!-- low items -->
       <section>
         <h3>Supplies Low Volume (&lt; 25%)</h3>
         <% if (redSupplies.length > 0) { %>
@@ -38,7 +38,7 @@
         <% } %>
       </section>
 
-      <!-- Red Bins -->
+      <!-- full bins -->
       <section>
         <h3>Bins Low Volume (&lt; 25%)</h3>
         <% if (redBins.length > 0) { %>
@@ -56,7 +56,7 @@
 
 
     <div class="dashbody2">
-        <!-- Late Employees -->
+        <!--  late -->
       <section>
         <h3>Late Employees (In Time &gt; 10:35)</h3>
         <% if (lateEmployees.length > 0) { %>
@@ -71,7 +71,7 @@
           <p>No late arrivals today.</p>
         <% } %>
       </section>
-      <!-- Yellow Supplies -->
+      <!-- moderae supply -->
       <section>
         <h3>Supplies Moderate Volume (25% - 50%)</h3>
         <% if (yellowSupplies.length > 0) { %>
@@ -87,7 +87,7 @@
         <% } %>
       </section>
 
-      <!-- Yellow Bins -->
+      <!-- moderate bin -->
       <section>
         <h3>Bins Moderate Volume (25% - 50%)</h3>
         <% if (yellowBins.length > 0) { %>
@@ -133,21 +133,21 @@
   }
 .ctflex {
   display: flex;
-  gap: 40px; /* reduced gap */
+  gap: 40px;
   justify-content:center;
   align-items: flex-start;
   padding: 20px;
-  flex-wrap: nowrap; /* prevent wrapping */
+  flex-wrap: nowrap; 
 }
 
 .dashbody, .dashbody2 {
-  flex: 1 1 auto; /* Allows flex items to grow and shrink based on content */
+  flex: 1 1 auto; 
   min-width: 0;
   
 }
 
 section {
-  padding: 6px 0; /* reduce vertical padding */
+  padding: 6px 0;
   margin-bottom: 10px;
   padding: 0 10px;
 }

@@ -3,7 +3,7 @@
 <main>
   <% 
     const today = new Date().toISOString().slice(0, 10);
-    const nowTime = new Date().toTimeString().slice(0,5); // HH:MM
+    const nowTime = new Date().toTimeString().slice(0,5); 
   %>
   <div class="employee-top">
   <h2 class="center">Employees - <%= station %> - <%= today %></h2>
@@ -70,30 +70,23 @@
   <% } %>
 </td>
 
-<!-- outtime-->
-            <td>
-              <% if (selectedDate === today) { %>
-                <% if (emp.in_time) { %>  <% if (emp.out_time) { %>
-                    <%= emp.out_time.toString().slice(0,5) %>
-                  <% } else { %>
-                    <% if (nowTime < "17:45") { %>
-                      Available at 17:45
-                    <% } else if (nowTime >= "17:45" && nowTime <= "18:15") { %>
-                      <button class="mark-btn" onclick="markAttendance(<%= emp.id %>, 'out')">
-                        <i class="fa fa-sign-out-alt"></i> Mark Attendance
-                      </button>
-                    <% } else { %>
-                      <span class="absent">Absent</span>
-                    <% } %>
-                  <% } %>
-                <% } else { %> <span class="absent">Absent</span>
-                <% } %>
-              <% } else { %>
-                <%- emp.out_time 
-                  ? `<span>${emp.out_time.toString().slice(0,5)}</span>` 
-                  : `<span class="absent">Absent</span>` %>
-              <% } %>
-            </td>
+
+<!-- outtime -->
+<td>
+  <% if (!emp.out_time) { %>
+    <% if (nowTime < "17:45") { %>
+      <span class="available">Available at 17:45</span>
+    <% } else if (nowTime >= "17:45" && nowTime <= "18:15") { %>
+      <form action="/mark-outtime/<%= emp.id %>" method="POST">
+        <button type="submit" class="mark-btn">Mark Attendance</button>
+      </form>
+    <% } else { %>
+      <span class="absent">Absent</span>
+    <% } %>
+  <% } else { %>
+    <span class="present"><%= emp.out_time.slice(0,5) %></span>
+  <% } %>
+</td>
 
             <td><%= emp.station %></td>
             <td>
