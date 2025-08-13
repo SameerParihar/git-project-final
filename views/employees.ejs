@@ -53,7 +53,7 @@
     <% } else { %>
       <% if (nowTime < "10:15") { %>
         Available at 10:15
-      <% } else if (nowTime >= "10:15" && nowTime <= "12:00") { %>
+      <% } else if (nowTime >= "10:15" && nowTime <= "10:45") { %>
         <button class="mark-btn" onclick="markAttendance(<%= emp.id %>, 'in')">
           <i class="fa fa-sign-in-alt"></i> Mark Attendance
         </button>
